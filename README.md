@@ -25,4 +25,4 @@ Run `CompareISO.exe`, which loads up this interface.
 From here, select two different ISO files and click "Compare". To get a wikitable-friendly text to copy and paste, click "Print Wiki Table".
 
 > [!WARNING]
-> Certain methods may take a long time to complete, depending on the complexity and size of the ISO file(s). Please be patient and wait for the operation to complete. If nothing happens after several minutes, you may then termine the program using Task Manager and file an issue.
+> Certain methods may take a long time to complete, depending on the complexity and size of the ISO file(s). Please be patient and wait for the operation to complete. If nothing happens after several minutes, you may then terminate the program using Task Manager. You'll be able to clean up the directories upon retrying.
