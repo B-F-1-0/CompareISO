@@ -7,10 +7,12 @@ The following ISO files are supported as of currently:
 * Windows 9x installation media
 * Windows NT installation media using the i386 installation method
 * Windows NT installation media using the WIM installation method for most non-earlier versions
+
 The following ISO files have limited support capability:
 * Non-Windows based installation media
 * Windows 3.0 MME installation media
 * About any other ISO that does not fall under the "does not support" section
+
 This program currently does not support:
 * Windows NT installation media using the WIM 1.07/1.08 installation method (applies for early builds of Vista)
 * Windows NT installation media with ESD compression (applies for Windows 10 and later)
