@@ -17,6 +17,7 @@ namespace CompareISO
     using ManagedWimLib;
     using System.Collections.ObjectModel;
     using static Microsoft.Wim.WimgApi;
+    using Newtonsoft.Json.Linq;
 
     // using SevenZipExtractor;
     public partial class Form1 : Form
@@ -97,6 +98,8 @@ namespace CompareISO
             String iso2Path = @iso2FileNameTextBox.Text;
             bool isWim = false;
 
+            progressLabel.Text = "Checking ISOs...";
+
             // validate files
             if (!validateIsos())
             {
@@ -136,9 +139,11 @@ namespace CompareISO
             FileStream iso2FileStream = new FileStream(iso2Path, FileMode.Open, FileAccess.Read, FileShare.None);
 
             // make and clean directories
+            progressLabel.Text = "Creating/cleaning temporary directories...";
             checkDirectories();
 
             // try to identify the type of install media to make life easier
+            progressLabel.Text = "Detecting versions...";
             try
             {
                 switch (detectWindows(iso1FileStream, iso2FileStream))
@@ -178,6 +183,7 @@ namespace CompareISO
                 }
 
                 // save the file versions given the inputted string list, and store them in the rich text box for the new form
+                progressLabel.Text = "Saving file version and description information...";
                 saveVersionInfo(isWim);
 
                 // done; message if they want to clean up temp files
@@ -336,6 +342,8 @@ namespace CompareISO
             wikiTableButton.Enabled = true;
             exitButton.Enabled = true;
             extractProgressBar.ForeColor = Color.DarkRed;
+            // update progress
+            progressLabel.Text = "Comparison failed";
         }
 
         static void checkDirectories()
@@ -398,9 +406,8 @@ namespace CompareISO
             // we should do this recursively
             extractProgressBar.Value = 0;
             extractProgressBar.Maximum = 100;
-            
 
-
+            progressLabel.Text = "Extracting ISO 1...";
             using (iso1)
             {
                 CDReader cd = new CDReader(iso1, true);
@@ -410,6 +417,7 @@ namespace CompareISO
             extractProgressBar.Value = 49;
             extractProgressBar.Value = 50;
 
+            progressLabel.Text = "Extracting ISO 2...";
             using (iso2)
             {
                 CDReader cd = new CDReader(iso2, true);
@@ -431,9 +439,14 @@ namespace CompareISO
                 iso2Files[i] = iso2Files[i].Remove(0, iso2Directory.Length + 1);
             }
 
+            // resolve case sensativity issues
+            iso1Files = iso1Files.Select(s => s.ToLowerInvariant()).ToArray();
+            iso2Files = iso2Files.Select(s => s.ToLowerInvariant()).ToArray();
+
             IEnumerable<String> removedFiles = iso1Files.Except(iso2Files);
             IEnumerable<String> addedFiles = iso2Files.Except(iso1Files);
 
+            progressLabel.Text = "Comparing files...";
             foreach (String s in removedFiles)
             {
                 removedFilesRichTextBox.ReadOnly = false;
@@ -483,6 +496,7 @@ namespace CompareISO
         private void comparei386Files(FileStream iso1, FileStream iso2) // extracts all files in I386, then compares them
         {
             // extract contents of I386 folder of both ISOs and puts them in the extracted directory created
+            progressLabel.Text = "Extracting ISO 1...";
             using (iso1)
             {
                 CDReader cd = new CDReader(iso1, true);
@@ -496,6 +510,7 @@ namespace CompareISO
                 }
             }
 
+            progressLabel.Text = "Extracting ISO 2...";
             using (iso2)
             {
                 CDReader cd = new CDReader(iso2, true);
@@ -525,9 +540,14 @@ namespace CompareISO
                 iso2Files[i] = iso2Files[i].Remove(0, iso2Directory.Length + 1);
             }
 
+            // resolve case sensativity issues
+            iso1Files = iso1Files.Select(s => s.ToLowerInvariant()).ToArray();
+            iso2Files = iso2Files.Select(s => s.ToLowerInvariant()).ToArray();
+
             IEnumerable<String> removedFiles = iso1Files.Except(iso2Files);
             IEnumerable<String> addedFiles = iso2Files.Except(iso1Files);
 
+            progressLabel.Text = "Comparing files...";
             foreach (String s in removedFiles)
             {
                 removedFilesRichTextBox.ReadOnly = false;
@@ -547,11 +567,13 @@ namespace CompareISO
             String iso19xdir = "WIN9X";
             String iso29xdir = "WIN9X";
 
+            progressLabel.Text = "Extracting ISO 1...";
             CDReader cd1 = new CDReader(iso1, true);
             String[] directories = cd1.GetDirectories(@"");
             directories = directories.Select(s => s.ToUpper()).ToArray();
             iso19xdir = win9xdetect.Intersect(directories).First();
 
+            progressLabel.Text = "Extracting ISO 2...";
             CDReader cd2 = new CDReader(iso2, true);
             directories = cd2.GetDirectories(@"");
             directories = directories.Select(s => s.ToUpper()).ToArray();
@@ -602,9 +624,14 @@ namespace CompareISO
                 iso2Files[i] = iso2Files[i].Remove(0, iso2Directory.Length + 1);
             }
 
+            // resolve case sensativity issues
+            iso1Files = iso1Files.Select(s => s.ToLowerInvariant()).ToArray();
+            iso2Files = iso2Files.Select(s => s.ToLowerInvariant()).ToArray();
+
             IEnumerable<String> removedFiles = iso1Files.Except(iso2Files);
             IEnumerable<String> addedFiles = iso2Files.Except(iso1Files);
 
+            progressLabel.Text = "Comparing files...";
             foreach (String s in removedFiles)
             {
                 removedFilesRichTextBox.ReadOnly = false;
@@ -623,6 +650,7 @@ namespace CompareISO
         private void compareWIMFiles(FileStream iso1, FileStream iso2) // extracts install.wim, then compares the contents of a selected index inside there
         {
             extractProgressBar.Maximum = 100;
+            progressLabel.Text = "Extracting ISO 1's INSTALL.WIM...";
             using (iso1)
             {
                 CDReader cd = new CDReader(iso1, true);
@@ -631,6 +659,7 @@ namespace CompareISO
             extractProgressBar.Value = 50;
             extractProgressBar.Value = 49;
             extractProgressBar.Value = 50;
+            progressLabel.Text = "Extracting ISO 2's INSTALL.WIM...";
             using (iso2)
             {
                 CDReader cd = new CDReader(iso2, true);
@@ -642,6 +671,7 @@ namespace CompareISO
             {
                 DismApi.Initialize(DismLogLevel.LogErrors);
                 // Get the images in the WIM
+                progressLabel.Text = "Requesting SKUs...";
                 DismImageInfoCollection imageInfo1 = DismApi.GetImageInfo(iso1Directory + "\\INSTALL.WIM");
                 DismImageInfoCollection imageInfo2 = DismApi.GetImageInfo(iso2Directory + "\\INSTALL.WIM");
 
@@ -656,6 +686,7 @@ namespace CompareISO
                 var powerShell = PowerShell.Create();
 
                 // add the functions we need
+                progressLabel.Text = "Storing filenames to temporary text file...";
                 String wim1command = "Get-WindowsImageContent -ImagePath \"" + iso1Directory + "\\install.wim\"" + " -Index " + chooseIndexPrompt.indexwim1;
                 String wim2command = "Get-WindowsImageContent -ImagePath \"" + iso2Directory + "\\install.wim\"" + " -Index " + chooseIndexPrompt.indexwim2;
                 powerShell.AddScript(wim1command);
@@ -681,9 +712,14 @@ namespace CompareISO
                 var logFileIso2 = File.ReadAllLines(iso2Directory + "\\FILES.TXT");
                 var log2List = new List<string>(logFileIso2);
 
+                // resolve case sensativity issues
+                log1List = log1List.ConvertAll(d => d.ToLower());
+                log2List = log2List.ConvertAll(d => d.ToLower());
+
                 IEnumerable<String> removedFiles = log1List.Except(log2List);
                 IEnumerable<String> addedFiles = log2List.Except(log1List);
 
+                progressLabel.Text = "Comparing files...";
                 foreach (String s in removedFiles)
                 {
                     removedFilesRichTextBox.ReadOnly = false;
@@ -697,9 +733,9 @@ namespace CompareISO
                     addedFilesRichTextBox.ReadOnly = true;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("Unable to compare files. This can be caused due to a corrupt INSTALL.WIM, or older INSTALL.WIM versions that aren't supported by DISM. Most builds of Windows Vista are currently not supported.");
+                MessageBox.Show("Unable to compare files. This can be caused due to a corrupt INSTALL.WIM, or older INSTALL.WIM versions that aren't supported by DISM. Most builds of Windows Vista are currently not supported. The error was: " + ex.Message);
                 DismApi.Shutdown();
             }
         }
@@ -707,6 +743,7 @@ namespace CompareISO
         private void compareWIMUFIFiles(FileStream iso1, FileStream iso2) // extracts install.wim, then compares the contents of a selected index inside there
         {
             extractProgressBar.Maximum = 100;
+            progressLabel.Text = "Extracting ISO 1's INSTALL.WIM...";
             using (iso1)
             {
                 UdfReader cd = new UdfReader(iso1);
@@ -715,6 +752,7 @@ namespace CompareISO
             extractProgressBar.Value = 50;
             extractProgressBar.Value = 49;
             extractProgressBar.Value = 50;
+            progressLabel.Text = "Extracting ISO 2's INSTALL.WIM...";
             using (iso2)
             {
                 UdfReader cd = new UdfReader(iso2);
@@ -726,6 +764,7 @@ namespace CompareISO
             {
                 DismApi.Initialize(DismLogLevel.LogErrors);
                 // Get the images in the WIM
+                progressLabel.Text = "Requesting SKUs...";
                 DismImageInfoCollection imageInfo1 = DismApi.GetImageInfo(iso1Directory + "\\INSTALL.WIM");
                 DismImageInfoCollection imageInfo2 = DismApi.GetImageInfo(iso2Directory + "\\INSTALL.WIM");
 
@@ -740,6 +779,7 @@ namespace CompareISO
                 var powerShell = PowerShell.Create();
 
                 // add the functions we need
+                progressLabel.Text = "Storing filenames to temporary text file...";
                 String wim1command = "Get-WindowsImageContent -ImagePath \"" + iso1Directory + "\\install.wim\"" + " -Index " + chooseIndexPrompt.indexwim1;
                 String wim2command = "Get-WindowsImageContent -ImagePath \"" + iso2Directory + "\\install.wim\"" + " -Index " + chooseIndexPrompt.indexwim2;
                 powerShell.AddScript(wim1command);
@@ -765,9 +805,14 @@ namespace CompareISO
                 var logFileIso2 = File.ReadAllLines(iso2Directory + "\\FILES.TXT");
                 var log2List = new List<string>(logFileIso2);
 
+                // resolve case sensativity issues
+                log1List = log1List.ConvertAll(d => d.ToLower());
+                log2List = log2List.ConvertAll(d => d.ToLower());
+
                 IEnumerable<String> removedFiles = log1List.Except(log2List);
                 IEnumerable<String> addedFiles = log2List.Except(log1List);
 
+                progressLabel.Text = "Comparing files...";
                 foreach (String s in removedFiles)
                 {
                     removedFilesRichTextBox.ReadOnly = false;
@@ -826,6 +871,9 @@ namespace CompareISO
             compareButton.Enabled = true;
             wikiTableButton.Enabled = true;
             exitButton.Enabled = true;
+
+            // update progress
+            progressLabel.Text = "Comparison complete";
 
             // make sure we run saveVersionInfo first before this
             // otherwise we won't be able to have access to the files
@@ -932,6 +980,8 @@ namespace CompareISO
             // which are actually CAB files storing a single file
             // of the same name, hence why EXPAND.EXE would
             // work with them
+
+            progressLabel.Text = "Extracting CAB files...";
 
             string[] iso1CABFiles = Directory.GetFiles(iso1Directory, "*.cab");
             string[] iso1filesendingwith_Files = Directory.GetFiles(iso1Directory, "*.*_");

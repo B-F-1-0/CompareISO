@@ -42,6 +42,7 @@
             iso1FileNameTextBox = new TextBox();
             iso2FileNameTextBox = new TextBox();
             extractProgressBar = new ProgressBar();
+            progressLabel = new Label();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -131,7 +132,7 @@
             // 
             // exitButton
             // 
-            exitButton.Location = new Point(403, 446);
+            exitButton.Location = new Point(403, 489);
             exitButton.Name = "exitButton";
             exitButton.Size = new Size(125, 52);
             exitButton.TabIndex = 5;
@@ -141,7 +142,7 @@
             // 
             // compareButton
             // 
-            compareButton.Location = new Point(75, 446);
+            compareButton.Location = new Point(75, 489);
             compareButton.Name = "compareButton";
             compareButton.Size = new Size(125, 52);
             compareButton.TabIndex = 6;
@@ -151,7 +152,7 @@
             // 
             // wikiTableButton
             // 
-            wikiTableButton.Location = new Point(239, 446);
+            wikiTableButton.Location = new Point(239, 489);
             wikiTableButton.Name = "wikiTableButton";
             wikiTableButton.Size = new Size(125, 52);
             wikiTableButton.TabIndex = 7;
@@ -197,11 +198,23 @@
             extractProgressBar.Style = ProgressBarStyle.Continuous;
             extractProgressBar.TabIndex = 10;
             // 
+            // progressLabel
+            // 
+            progressLabel.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point);
+            progressLabel.ForeColor = Color.Black;
+            progressLabel.Location = new Point(79, 450);
+            progressLabel.Name = "progressLabel";
+            progressLabel.Size = new Size(449, 27);
+            progressLabel.TabIndex = 11;
+            progressLabel.Text = "Enter some files and press \"Compare\"";
+            progressLabel.TextAlign = ContentAlignment.MiddleCenter;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(9F, 21F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(603, 523);
+            ClientSize = new Size(603, 554);
+            Controls.Add(progressLabel);
             Controls.Add(extractProgressBar);
             Controls.Add(groupBox1);
             Controls.Add(iso2FileNameTextBox);
@@ -241,5 +254,6 @@
         private TextBox iso1FileNameTextBox;
         private TextBox iso2FileNameTextBox;
         private ProgressBar extractProgressBar;
+        private Label progressLabel;
     }
 }
