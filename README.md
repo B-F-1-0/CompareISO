@@ -6,7 +6,7 @@ A basic C# program for comparing the contents of two ISO files, checking what ha
 The following ISO files are supported as of currently:
 * Windows 9x installation media
 * Windows NT installation media using the i386 installation method
-* Windows NT installation media using the WIM installation method for most non-earlier versions
+* Windows NT installation media using the WIM installation method for most non-earlier versions (file descriptions and file versions currently not recorded)
 
 The following ISO files have limited support capability:
 * Non-Windows based installation media
