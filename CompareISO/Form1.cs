@@ -29,6 +29,7 @@ namespace CompareISO
         // hardcode directories
         const String WIMdetect = @"\\SOURCES\\INSTALL.WIM";
         const String i386detect = @"\\I386";
+        const String amd64detect = @"\\AMD64";
         static readonly string[] win9xdetect = { "\\WIN95", "\\WIN9X", "\\WIN98", "\\WINME", "\\RETAIL" };
 
         // safe keepings for removed and added table output
@@ -156,8 +157,14 @@ namespace CompareISO
                         }
                     case "i386":
                         {
-                            MessageBox.Show("This program has detected that it's trying to compare two Windows NT install disks with an i386 folder.\n\nThe contents of the I386 folders will be compared, but not its subdirectories. If there are unexpanded files in the directory, it will expand those and remove the unexpanded versions.");
+                            MessageBox.Show("This program has detected that it's trying to compare two Windows NT install disks with an I386 folder.\n\nThe contents of the I386 folders will be compared, but not its subdirectories. If there are unexpanded files in the directory, it will expand those and remove the unexpanded versions.");
                             comparei386Files(iso1FileStream, iso2FileStream);
+                            break;
+                        }
+                    case "amd64":
+                        {
+                            MessageBox.Show("This program has detected that it's trying to compare two Windows NT install disks with an I386 and AMD64 folder.\n\nThe contents of the I386 and AMD64 folders will be compared, but not its subdirectories. If there are unexpanded files in the directory, it will expand those and remove the unexpanded versions.");
+                            compareamd64Files(iso1FileStream, iso2FileStream);
                             break;
                         }
                     case "wim":
@@ -212,6 +219,7 @@ namespace CompareISO
             // the best way we can identify the Windows versions is by finding the folowing directories/files:
             // Windows 9x: RETAIL, WIN9X, WIN95, WIN98, WINME
             // Windows NT (i386 era): I386
+            // Windows NT (x64): AMD64
             // Windows NT (WIM era): SOURCES/INSTALL.WIM
             // If all else fails, we didn't recognize it
             // Anything of a non-Windows installation is unsupported
@@ -241,7 +249,14 @@ namespace CompareISO
                 }
                 else if (directories.Contains("\\I386"))
                 {
-                    iso1Format = "i386";
+                    if (directories.Contains("\\AMD64"))
+                    {
+                        iso1Format = "amd64";
+                    }
+                    else
+                    {
+                        iso1Format = "i386";
+                    }
                 }
                 else if (win9xdetect.Intersect(directories).Any())
                 {
@@ -272,7 +287,14 @@ namespace CompareISO
                 }
                 else if (directories.Contains("\\I386"))
                 {
-                    iso2Format = "i386";
+                    if (directories.Contains("\\AMD64"))
+                    {
+                        iso2Format = "amd64";
+                    }
+                    else
+                    {
+                        iso2Format = "i386";
+                    }
                 }
                 else if (win9xdetect.Intersect(directories).Any())
                 {
@@ -515,6 +537,91 @@ namespace CompareISO
             {
                 CDReader cd = new CDReader(iso2, true);
                 String[] files = cd.GetFiles("\\I386");
+                extractProgressBar.Value = 0;
+                extractProgressBar.Maximum = files.Length;
+                foreach (String s in files)
+                {
+                    copyFile(cd.GetFileInfo(s), iso2Directory);
+                    extractProgressBar.Value++;
+                }
+            }
+
+            // in both directories, check for files ending with _ or CAB and expand them
+            extractCABs();
+
+            // find what's in the ISO1Directory but not in ISO2Directory, and put them in removed files
+            string[] iso1Files = Directory.GetFiles(iso1Directory, "*", SearchOption.TopDirectoryOnly);
+            string[] iso2Files = Directory.GetFiles(iso2Directory, "*", SearchOption.TopDirectoryOnly);
+
+            for (int i = 0; i < iso1Files.Length; i++)
+            {
+                iso1Files[i] = iso1Files[i].Remove(0, iso1Directory.Length + 1);
+            }
+            for (int i = 0; i < iso2Files.Length; i++)
+            {
+                iso2Files[i] = iso2Files[i].Remove(0, iso2Directory.Length + 1);
+            }
+
+            // resolve case sensativity issues
+            iso1Files = iso1Files.Select(s => s.ToLowerInvariant()).ToArray();
+            iso2Files = iso2Files.Select(s => s.ToLowerInvariant()).ToArray();
+
+            IEnumerable<String> removedFiles = iso1Files.Except(iso2Files);
+            IEnumerable<String> addedFiles = iso2Files.Except(iso1Files);
+
+            progressLabel.Text = "Comparing files...";
+            foreach (String s in removedFiles)
+            {
+                removedFilesRichTextBox.ReadOnly = false;
+                removedFilesRichTextBox.AppendText(s + "\n");
+                removedFilesRichTextBox.ReadOnly = true;
+            }
+            foreach (String s in addedFiles)
+            {
+                addedFilesRichTextBox.ReadOnly = false;
+                addedFilesRichTextBox.AppendText(s + "\n");
+                addedFilesRichTextBox.ReadOnly = true;
+            }
+        }
+
+        private void compareamd64Files(FileStream iso1, FileStream iso2) // extracts all files in I386/AMD64, then compares them
+        {
+            // extract contents of I386/AND64 folder of both ISOs and puts them in the extracted directory created
+            progressLabel.Text = "Extracting ISO 1...";
+            using (iso1)
+            {
+                CDReader cd = new CDReader(iso1, true);
+                String[] files = cd.GetFiles("\\I386");
+                extractProgressBar.Value = 0;
+                extractProgressBar.Maximum = files.Length;
+                foreach (String s in files)
+                {
+                    copyFile(cd.GetFileInfo(s), iso1Directory);
+                    extractProgressBar.Value++;
+                }
+                files = cd.GetFiles("\\AMD64");
+                extractProgressBar.Value = 0;
+                extractProgressBar.Maximum = files.Length;
+                foreach (String s in files)
+                {
+                    copyFile(cd.GetFileInfo(s), iso1Directory);
+                    extractProgressBar.Value++;
+                }
+            }
+
+            progressLabel.Text = "Extracting ISO 2...";
+            using (iso2)
+            {
+                CDReader cd = new CDReader(iso2, true);
+                String[] files = cd.GetFiles("\\I386");
+                extractProgressBar.Value = 0;
+                extractProgressBar.Maximum = files.Length;
+                foreach (String s in files)
+                {
+                    copyFile(cd.GetFileInfo(s), iso2Directory);
+                    extractProgressBar.Value++;
+                }
+                files = cd.GetFiles("\\AMD64");
                 extractProgressBar.Value = 0;
                 extractProgressBar.Maximum = files.Length;
                 foreach (String s in files)
