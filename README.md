@@ -20,7 +20,8 @@ This program currently does not support:
 ## Usage
 Run `CompareISO.exe`, which loads up this interface.
 
-![Screenshot 2024-04-05 182432](https://github.com/B-F-1-0/CompareISO/assets/115908504/8b2fe482-a63c-4d07-b203-3f9bfc33638b)
+<img width="605" height="586" alt="CompareISO's interface" src="https://github.com/user-attachments/assets/08e48194-f43f-433d-8474-ad8069d48695" />
+
 
 From here, select two different ISO files and click "Compare". To get a wikitable-friendly text to copy and paste, click "Print Wiki Table".
 
