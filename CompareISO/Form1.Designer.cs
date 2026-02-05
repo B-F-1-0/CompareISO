@@ -43,6 +43,7 @@
             iso2FileNameTextBox = new TextBox();
             extractProgressBar = new ProgressBar();
             progressLabel = new Label();
+            tempFolderButton = new Button();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             SuspendLayout();
@@ -132,7 +133,7 @@
             // 
             // exitButton
             // 
-            exitButton.Location = new Point(403, 489);
+            exitButton.Location = new Point(462, 489);
             exitButton.Name = "exitButton";
             exitButton.Size = new Size(125, 52);
             exitButton.TabIndex = 5;
@@ -142,7 +143,7 @@
             // 
             // compareButton
             // 
-            compareButton.Location = new Point(75, 489);
+            compareButton.Location = new Point(12, 490);
             compareButton.Name = "compareButton";
             compareButton.Size = new Size(125, 52);
             compareButton.TabIndex = 6;
@@ -152,7 +153,7 @@
             // 
             // wikiTableButton
             // 
-            wikiTableButton.Location = new Point(239, 489);
+            wikiTableButton.Location = new Point(162, 490);
             wikiTableButton.Name = "wikiTableButton";
             wikiTableButton.Size = new Size(125, 52);
             wikiTableButton.TabIndex = 7;
@@ -209,11 +210,22 @@
             progressLabel.Text = "Enter some files and press \"Compare\"";
             progressLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // tempFolderButton
+            // 
+            tempFolderButton.Location = new Point(312, 489);
+            tempFolderButton.Name = "tempFolderButton";
+            tempFolderButton.Size = new Size(125, 52);
+            tempFolderButton.TabIndex = 12;
+            tempFolderButton.Text = "Open Program Folder";
+            tempFolderButton.UseVisualStyleBackColor = true;
+            tempFolderButton.Click += tempFolderButton_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(9F, 21F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(603, 554);
+            Controls.Add(tempFolderButton);
             Controls.Add(progressLabel);
             Controls.Add(extractProgressBar);
             Controls.Add(groupBox1);
@@ -255,5 +267,6 @@
         private TextBox iso2FileNameTextBox;
         private ProgressBar extractProgressBar;
         private Label progressLabel;
+        private Button tempFolderButton;
     }
 }

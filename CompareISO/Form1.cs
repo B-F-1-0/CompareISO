@@ -237,7 +237,7 @@ namespace CompareISO
                 directories = cd.GetDirectories(@"");
                 directories = directories.Select(s => s.ToUpper()).ToArray();
                 files = cd.GetFiles(@"");
-                
+
                 if (directories.Contains("\\SOURCES"))
                 {
                     sourcesfiles = cd.GetFiles("\\SOURCES");
@@ -393,7 +393,15 @@ namespace CompareISO
                 {
                     foreach (FileInfo file in dir1.EnumerateFiles())
                     {
-                        file.Delete();
+                        try
+                        {
+                            file.Delete();
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("An error occurred. " + ex.Message + " You must delete the files manually, preferably by closing the program first.");
+                            break;
+                        }
                     }
                     foreach (DirectoryInfo dir in dir1.EnumerateDirectories())
                     {
@@ -409,7 +417,15 @@ namespace CompareISO
                 {
                     foreach (FileInfo file in dir2.EnumerateFiles())
                     {
-                        file.Delete();
+                        try
+                        {
+                            file.Delete();
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("An error occurred. " + ex.Message + " You must delete the files manually, preferably by closing the program first.");
+                            break;
+                        }
                     }
                     foreach (DirectoryInfo dir in dir2.EnumerateDirectories())
                     {
@@ -433,7 +449,7 @@ namespace CompareISO
             using (iso1)
             {
                 CDReader cd = new CDReader(iso1, true);
-                extractRecursive("", cd.GetDirectories(""), iso1,iso1Directory);
+                extractRecursive("", cd.GetDirectories(""), iso1, iso1Directory);
             }
             extractProgressBar.Value = 50;
             extractProgressBar.Value = 49;
@@ -481,7 +497,7 @@ namespace CompareISO
                 addedFilesRichTextBox.AppendText(s + "\n");
                 addedFilesRichTextBox.ReadOnly = true;
             }
-            
+
         }
 
         private String[] extractRecursive(String currentDir, String[] directories, FileStream iso, String saveDirectory)
@@ -510,7 +526,7 @@ namespace CompareISO
                 {
                     extractRecursive(d, additionalDirs, iso, saveDirectory);
                 }
-                
+
             }
             return new string[0];
         }
@@ -753,7 +769,7 @@ namespace CompareISO
             }
         }
 
-        
+
         private void compareWIMFiles(FileStream iso1, FileStream iso2) // extracts install.wim, then compares the contents of a selected index inside there
         {
             extractProgressBar.Maximum = 100;
@@ -842,7 +858,7 @@ namespace CompareISO
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Unable to compare files. This can be caused due to a corrupt INSTALL.WIM, or older INSTALL.WIM versions that aren't supported by DISM. Most builds of Windows Vista are currently not supported. The error was: " + ex.Message);
+                MessageBox.Show("Unable to compare files. This can be caused due to a corrupt INSTALL.WIM, or older INSTALL.WIM versions that aren't supported by DISM. Several pre-reset builds of Windows Vista are currently not supported. The error was: " + ex.Message);
                 DismApi.Shutdown();
             }
         }
@@ -995,7 +1011,15 @@ namespace CompareISO
             {
                 foreach (FileInfo file in dir1.EnumerateFiles())
                 {
-                    file.Delete();
+                    try
+                    {
+                        file.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("An error occurred. " + ex.Message + " You must delete the files manually, preferably by closing the program first.");
+                        break;
+                    }
                 }
                 foreach (DirectoryInfo dir in dir1.EnumerateDirectories())
                 {
@@ -1003,7 +1027,15 @@ namespace CompareISO
                 }
                 foreach (FileInfo file in dir2.EnumerateFiles())
                 {
-                    file.Delete();
+                    try
+                    {
+                        file.Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("An error occurred. " + ex.Message + " You must delete the files manually, preferably by closing the program first.");
+                        break;
+                    }
                 }
                 foreach (DirectoryInfo dir in dir2.EnumerateDirectories())
                 {
@@ -1110,25 +1142,25 @@ namespace CompareISO
             extractProgressBar.Value = 0;
             if (iso1CABFiles.Any())
             {
-                var process = Process.Start("expand.exe", "-R " + iso1Directory + "\\*.CAB");
+                var process = Process.Start("expand.exe", "-r ./" + iso1Directory + "\\*.CAB -F:* " + iso1Directory);
                 process.WaitForExit(300000);
             }
             extractProgressBar.Value = 25;
             if (iso1filesendingwith_Files.Any())
             {
-                var process2 = Process.Start("expand.exe", "-R " + iso1Directory + "\\*.*_");
+                var process2 = Process.Start("expand.exe", "-r ./" + iso1Directory + "\\*.*_");
                 process2.WaitForExit(300000);
             }
             extractProgressBar.Value = 50;
             if (iso2CABFiles.Any())
             {
-                var process3 = Process.Start("expand.exe", "-R " + iso2Directory + "\\*.CAB");
+                var process3 = Process.Start("expand.exe", "-r ./" + iso2Directory + "\\*.CAB -F:* " + iso2Directory);
                 process3.WaitForExit(300000);
             }
             extractProgressBar.Value = 75;
             if (iso2filesendingwith_Files.Any())
             {
-                var process4 = Process.Start("expand.exe", "-R " + iso2Directory + "\\*.*_");
+                var process4 = Process.Start("expand.exe", "-r ./" + iso2Directory + "\\*.*_");
                 process4.WaitForExit(300000);
             }
             extractProgressBar.Value = 100;
@@ -1150,6 +1182,12 @@ namespace CompareISO
             {
                 File.Delete(file);
             }
+        }
+
+        private void tempFolderButton_Click(object sender, EventArgs e)
+        {
+            string directory = Directory.GetCurrentDirectory();
+            Process.Start("explorer.exe", @directory);
         }
     }
 }
